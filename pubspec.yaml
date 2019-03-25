@@ -46,6 +46,15 @@ flutter:
    - assets/vzh/vzh2.jpg
    - assets/vzh/vzh3.jpg
    - assets/vzh/vzh4.jpg
+   - assets/vzh/vzh5.jpg
+   - assets/vzh/vzh6.jpg
+   - assets/vzh/vzh7.jpg
+   - assets/vzh/vzh8.jpg
+   - assets/vzh/vzh9.jpg
+   - assets/vzh/vzh10.jpg
+   - assets/vzh/vzh11.jpg
+   - assets/vzh/vzh12.jpg
+   - assets/vzh/vzh13.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

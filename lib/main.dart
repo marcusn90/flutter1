@@ -18,7 +18,7 @@ class Home extends StatelessWidget {
           tooltip: 'Navigation menu',
           onPressed: null,
         ),
-        title: Text('Vzhukh'),
+        title: Text('Choose your Vzhukh avatar'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
@@ -29,7 +29,7 @@ class Home extends StatelessWidget {
       ),
       // body is the majority of the screen.
       body: Container(
-        margin: EdgeInsets.all(8),
+        // margin: EdgeInsets.all(8),
         child: VzhukhPhotos()
       ),
       // floatingActionButton: FloatingActionButton(
@@ -57,28 +57,49 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
     });
   }
 
-  _buildPreview() {
-    return [1,2,3,4].map((i) {
-      return Expanded(
+  List<Container> _buildPreview() {
+    return List.generate(13, (i) {
+      return Container(
         child: GestureDetector(
-          child: _buildImg(i),
-          onTap: () => _updateIndex(i),
+          child: _buildImg(i+1),
+          onTap: () => _updateIndex(i+1),
         )
       );
-    }).toList();
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            child:_buildImg(_index),
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black12,
+              ),
+              child: Center(
+                child: CircleAvatar(
+                  backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
+                  radius: 150,
+                ),
+              ),
+            ),
           ),
-          Row(
-            children: _buildPreview(),
-          ),
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: GridView.extent(
+                children: _buildPreview(),
+                maxCrossAxisExtent: 150,
+                padding: const EdgeInsets.all(4),
+                mainAxisSpacing: 4,
+                crossAxisSpacing: 4
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -88,6 +109,9 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
 Widget _buildImg(int i) {
   return Container(
     margin:EdgeInsets.all(4),
-    child: Image.asset('assets/vzh/vzh$i.jpg')
+    child: FittedBox(
+      fit: BoxFit.cover,
+      child: Image.asset('assets/vzh/vzh$i.jpg')
+    )
   );
 }
