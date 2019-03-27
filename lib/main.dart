@@ -58,7 +58,7 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
   }
 
   List<Container> _buildPreview() {
-    return List.generate(13, (i) {
+    return List.generate(14, (i) {
       return Container(
         child: GestureDetector(
           child: _buildImg(i+1),
@@ -107,11 +107,42 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
 }
 
 Widget _buildImg(int i) {
+  Widget label = Text(
+    'vzh $i',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  );
+  Widget fittedImg = FittedBox(
+    fit: BoxFit.cover,
+    child: Image.asset('assets/vzh/vzh$i.jpg'),
+  );
   return Container(
+    decoration: BoxDecoration(
+      color: Colors.green,
+    ),
     margin:EdgeInsets.all(4),
-    child: FittedBox(
-      fit: BoxFit.cover,
-      child: Image.asset('assets/vzh/vzh$i.jpg')
+    child: Stack(
+      fit: StackFit.passthrough,
+      alignment: Alignment.bottomRight,
+      children: <Widget>[
+        Container(
+          child: fittedImg
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+            decoration: BoxDecoration(
+              color: Colors.black45,
+            ),
+            child: label
+          ),
+        ),
+      ],
     )
   );
 }

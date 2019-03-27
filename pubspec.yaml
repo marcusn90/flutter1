@@ -55,6 +55,7 @@ flutter:
    - assets/vzh/vzh11.jpg
    - assets/vzh/vzh12.jpg
    - assets/vzh/vzh13.jpg
+   - assets/vzh/vzh14.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.
