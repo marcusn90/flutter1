@@ -51,13 +51,30 @@ class VzhukhPhotos extends StatefulWidget {
 
 class _VzhukhPhotosState extends State<VzhukhPhotos> {
   int _index = 4;
+  bool _grid = false;
+
   _updateIndex(int newIndex) {
     setState(() {
      _index = newIndex;
     });
   }
 
-  List<Container> _buildPreview() {
+  Widget _buildPreview() {
+    print('Grid: $_grid');
+    return _grid ? GridView.extent(
+      children: _buildImgList(),
+      maxCrossAxisExtent: 150,
+      padding: const EdgeInsets.all(4),
+      mainAxisSpacing: 4,
+      crossAxisSpacing: 4
+    ) : ListView(
+      shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      itemExtent: 200,
+      children: _buildImgList(),
+    );
+  }
+  List<Container> _buildImgList() {
     return List.generate(14, (i) {
       return Container(
         child: GestureDetector(
@@ -75,30 +92,43 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            flex: 2,
+            // flex: 3,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black12,
+                color: Colors.grey[200],
               ),
-              child: Center(
-                child: CircleAvatar(
-                  backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
-                  radius: 150,
-                ),
+              child: Stack(
+                children: <Widget>[
+                  Center(
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
+                      radius: 150,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    child: Column(children: <Widget>[
+                      GestureDetector(
+                        child: Icon(_grid ? Icons.list : Icons.grid_on, color: Colors.blueAccent,),
+                        onTap: () {
+                          setState(() {
+                            _grid = !_grid;
+                          });
+                        },
+                      ),
+                    ],),
+                  )
+                ],
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              child: GridView.extent(
-                children: _buildPreview(),
-                maxCrossAxisExtent: 150,
-                padding: const EdgeInsets.all(4),
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4
-              ),
-            ),
+          Container(
+            // decoration: BoxDecoration(
+            //   color: Colors.black54,
+            // ),
+            height: 200,
+            child: _buildPreview(),
           )
         ],
       ),
@@ -120,9 +150,6 @@ Widget _buildImg(int i) {
     child: Image.asset('assets/vzh/vzh$i.jpg'),
   );
   return Container(
-    decoration: BoxDecoration(
-      color: Colors.green,
-    ),
     margin:EdgeInsets.all(4),
     child: Stack(
       fit: StackFit.passthrough,
