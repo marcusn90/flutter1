@@ -107,7 +107,7 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
                   ),
                   Positioned(
                     bottom: 10,
-                    left: 10,
+                    right: 10,
                     child: Column(children: <Widget>[
                       GestureDetector(
                         child: Icon(_grid ? Icons.list : Icons.grid_on, color: Colors.blueAccent,),
