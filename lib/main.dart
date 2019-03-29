@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:p2/details.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -100,9 +101,17 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
               child: Stack(
                 children: <Widget>[
                   Center(
-                    child: CircleAvatar(
-                      backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
-                      radius: 150,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Details(_index)),
+                        );
+                      },
+                      child: CircleAvatar(
+                        backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
+                        radius: 150,
+                      ),
                     ),
                   ),
                   Positioned(
