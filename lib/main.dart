@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:p2/details.dart';
+import 'package:p2/models.dart';
+import 'package:p2/utils.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -51,17 +54,33 @@ class VzhukhPhotos extends StatefulWidget {
 }
 
 class _VzhukhPhotosState extends State<VzhukhPhotos> {
-  int _index = 4;
+  CatObj _current;
   bool _grid = false;
+  List<CatObj> _data = [];
 
-  _updateIndex(int newIndex) {
+  _VzhukhPhotosState(){
+    print('Construct _VzhukhPhotosState');
+    _fetch();
+  }
+
+  _fetch() async {
+    final data =  await loadData();
+    print(data);
+    if (data.length > 0) {
+      setState(() {
+        _data = data;
+        _current = data[0];
+      });
+    }
+  }
+
+  _updateCurrentItem(CatObj newItem) {
     setState(() {
-     _index = newIndex;
+     _current = newItem;
     });
   }
 
   Widget _buildPreview() {
-    print('Grid: $_grid');
     return _grid ? GridView.extent(
       children: _buildImgList(),
       maxCrossAxisExtent: 150,
@@ -75,19 +94,23 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
       children: _buildImgList(),
     );
   }
+
   List<Container> _buildImgList() {
-    return List.generate(14, (i) {
+    return _data.map((item) {
       return Container(
         child: GestureDetector(
-          child: _buildImg(i+1),
-          onTap: () => _updateIndex(i+1),
+          child: _buildImg(item),
+          onTap: () => _updateCurrentItem(item),
         )
       );
-    });
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_data.length == 0) {
+      return Text('Loading...');
+    }
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -105,11 +128,11 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Details(_index)),
+                          MaterialPageRoute(builder: (context) => Details(_current)),
                         );
                       },
                       child: CircleAvatar(
-                        backgroundImage: AssetImage('assets/vzh/vzh$_index.jpg'),
+                        backgroundImage: AssetImage(_current.image),
                         radius: 150,
                       ),
                     ),
@@ -145,9 +168,9 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
   }
 }
 
-Widget _buildImg(int i) {
+Widget _buildImg(CatObj item) {
   Widget label = Text(
-    'vzh $i',
+    item.title,
     style: TextStyle(
       fontSize: 10,
       fontWeight: FontWeight.bold,
@@ -156,7 +179,7 @@ Widget _buildImg(int i) {
   );
   Widget fittedImg = FittedBox(
     fit: BoxFit.cover,
-    child: Image.asset('assets/vzh/vzh$i.jpg'),
+    child: Image.asset(item.image),
   );
   return Container(
     margin:EdgeInsets.all(4),
