@@ -6,8 +6,12 @@ import 'package:p2/utils.dart';
 
 void main() {
   runApp(MaterialApp(
+    initialRoute: '/',
+    routes: {
+      '/': (context) => Home(),
+      Details.routeName: (ctx) => Details(),
+    },
     title: 'Flutter Tutorial',
-    home: Home(),
   ));
 }
 
@@ -17,19 +21,19 @@ class Home extends StatelessWidget {
     // Scaffold is a layout for the major Material Components.
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          tooltip: 'Navigation menu',
-          onPressed: null,
-        ),
+        // leading: IconButton(
+        //   icon: Icon(Icons.menu),
+        //   tooltip: 'Navigation menu',
+        //   onPressed: null,
+        // ),
         title: Text('Choose your Vzhukh avatar'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: null,
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(Icons.search),
+        //     tooltip: 'Search',
+        //     onPressed: null,
+        //   ),
+        // ],
       ),
       // body is the majority of the screen.
       body: Container(
@@ -53,10 +57,25 @@ class VzhukhPhotos extends StatefulWidget {
   }
 }
 
-class _VzhukhPhotosState extends State<VzhukhPhotos> {
+class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderStateMixin {
   CatObj _current;
+  String _prevImg = '', _nextImg = '';
   bool _grid = false;
   List<CatObj> _data = [];
+
+
+  Animation<double> animation;
+  AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+    animation = Tween<double>(begin: 0, end: 1).animate(controller)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
 
   _VzhukhPhotosState(){
     print('Construct _VzhukhPhotosState');
@@ -70,14 +89,20 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
       setState(() {
         _data = data;
         _current = data[0];
+        _nextImg = _current.image;
+        controller.forward();
       });
     }
   }
 
   _updateCurrentItem(CatObj newItem) {
     setState(() {
-     _current = newItem;
+      _current = newItem;
+      _prevImg = _nextImg;
+      _nextImg = _current.image;
     });
+    controller.reset();
+    controller.forward();
   }
 
   Widget _buildPreview() {
@@ -107,6 +132,12 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_data.length == 0) {
       return Text('Loading...');
@@ -126,14 +157,34 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> {
                   Center(
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(builder: (context) => Details(_current)),
+                          Details.routeName,
+                          arguments: _current,
                         );
                       },
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage(_current.image),
-                        radius: 150,
+                      child: Hero(
+                        tag: 'mainImg',
+                        child: Stack(
+                          children: <Widget>[
+                            Opacity(
+                              opacity: 1 - animation.value,
+                              child: CircleAvatar(
+                                key: UniqueKey(),
+                                backgroundImage: AssetImage(_prevImg),
+                                radius: 150,
+                              ),
+                            ),
+                            Opacity(
+                              opacity: animation.value,
+                              child: CircleAvatar(
+                                key: UniqueKey(),
+                                backgroundImage: AssetImage(_nextImg),
+                                radius: 150,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
