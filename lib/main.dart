@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+
 import 'package:p2/details.dart';
 import 'package:p2/models.dart';
-import 'package:p2/utils.dart';
+
+import 'package:p2/appstate.dart';
 
 void main() {
+  final appState = AppState();
+  appState.fetchItems();
   runApp(MaterialApp(
     initialRoute: '/',
     routes: {
-      '/': (context) => Home(),
+      '/': (context) => ScopedModel<AppState>(
+        model: appState,
+        child: Home()
+      ),
       Details.routeName: (ctx) => Details(),
     },
     title: 'Flutter Tutorial',
@@ -38,7 +46,12 @@ class Home extends StatelessWidget {
       // body is the majority of the screen.
       body: Container(
         // margin: EdgeInsets.all(8),
-        child: VzhukhPhotos()
+        child: ScopedModelDescendant<AppState>(
+          builder: (context, child, state) {
+            print('build VzhukhPhotos !!!');
+            return VzhukhPhotos(state.items);
+          }
+        )
       ),
       // floatingActionButton: FloatingActionButton(
       //   tooltip: 'Add', // used by assistive technologies
@@ -51,6 +64,8 @@ class Home extends StatelessWidget {
 
 // class VzhukhPhotos extends StatelessWidget {
 class VzhukhPhotos extends StatefulWidget {
+  VzhukhPhotos(this._items);
+  final List<CatObj> _items;
   @override
   _VzhukhPhotosState createState() {
     return _VzhukhPhotosState();
@@ -61,8 +76,6 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
   CatObj _current;
   String _prevImg = '', _nextImg = '';
   bool _grid = false;
-  List<CatObj> _data = [];
-
 
   Animation<double> animation;
   AnimationController controller;
@@ -70,6 +83,11 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    print('init:');
+    print(widget._items.length);
+    if (widget._items.length > 0) {
+      _updateCurrentItem(widget._items[0]);
+    }
     controller = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
     animation = Tween<double>(begin: 0, end: 1).animate(controller)
       ..addListener(() {
@@ -77,22 +95,15 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
       });
   }
 
-  _VzhukhPhotosState(){
-    print('Construct _VzhukhPhotosState');
-    _fetch();
+  @override
+  didChangeDependencies() {
+    super.didChangeDependencies();
+    print('UPDATE');
+    print(widget._items.length);
   }
 
-  _fetch() async {
-    final data =  await loadData();
-    print(data);
-    if (data.length > 0) {
-      setState(() {
-        _data = data;
-        _current = data[0];
-        _nextImg = _current.image;
-        controller.forward();
-      });
-    }
+  _VzhukhPhotosState(){
+    print('Construct _VzhukhPhotosState');
   }
 
   _updateCurrentItem(CatObj newItem) {
@@ -103,6 +114,10 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
     });
     controller.reset();
     controller.forward();
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text('${_current.title} selected'),
+      duration: Duration(milliseconds: 300),
+    ));
   }
 
   Widget _buildPreview() {
@@ -121,11 +136,18 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
   }
 
   List<Container> _buildImgList() {
-    return _data.map((item) {
+    return widget._items.map((item) {
       return Container(
-        child: GestureDetector(
-          child: _buildImg(item),
-          onTap: () => _updateCurrentItem(item),
+        child: ScopedModelDescendant<AppState>(
+          builder: (context, child, state) {
+            return GestureDetector(
+              child: _buildImg(item),
+              onTap: () {
+                _updateCurrentItem(item);
+                state.remove(item.id);
+              },
+            );
+          },
         )
       );
     }).toList();
@@ -139,8 +161,8 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    if (_data.length == 0) {
-      return Text('Loading...');
+    if (widget._items.length == 0) {
+      return Center(child: CircularProgressIndicator());
     }
     return Container(
       child: Column(
@@ -163,7 +185,7 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
                           arguments: _current,
                         );
                       },
-                      child: Hero(
+                      child: _current != null ? Hero(
                         tag: 'mainImg',
                         child: Stack(
                           children: <Widget>[
@@ -171,7 +193,8 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
                               opacity: 1 - animation.value,
                               child: CircleAvatar(
                                 key: UniqueKey(),
-                                backgroundImage: AssetImage(_prevImg),
+                                backgroundImage: _prevImg == '' ? null :AssetImage(_prevImg),
+                                backgroundColor: Colors.transparent,
                                 radius: 150,
                               ),
                             ),
@@ -179,13 +202,14 @@ class _VzhukhPhotosState extends State<VzhukhPhotos> with SingleTickerProviderSt
                               opacity: animation.value,
                               child: CircleAvatar(
                                 key: UniqueKey(),
-                                backgroundImage: AssetImage(_nextImg),
+                                backgroundImage: _nextImg == '' ? null :AssetImage(_nextImg),
+                                backgroundColor: Colors.transparent,
                                 radius: 150,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ) : Text('Tap photo to preview and remove ;)'),
                     ),
                   ),
                   Positioned(
